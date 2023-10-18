@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 //        return modelAndView;
 //    }
 //
-//    @ExceptionHandler(Exception.class) // Handle generic exceptions
+//    @ExceptionHandler(Exception.class)
 //    public ModelAndView handleException(Exception ex) {
 //        ModelAndView modelAndView = new ModelAndView("error");
 //        modelAndView.addObject("errorMessage", "An error occurred.");
