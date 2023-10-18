@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script th:src="@{/css/timeUpdater.js}" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .logo {
+            max-height: 100px;
+        }
+        .welcome-text {
+            font-size: 24px;
+        }
+        .btn-custom {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+        }
+        .survey-card {
+<!--            position: absolute;-->
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+
+        }
+        .right-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            width: 300px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+        .right-menu a {
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+            text-align: center;
+        }
+        .blog-card {
+            margin-top: 20px;
+            border: 2px solid black;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        .blog-number {
+            font-size: 50px;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        .admin-actions-label {
+            margin-bottom: 0px;
+        }
+        .btn-link {
+            text-decoration: none;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+        }
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-button {
+            text-decoration: underline;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+            cursor: pointer;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0);
+            z-index: 1;
+        }
+        .dropdown-content li {
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png" alt="Logo" class="logo">
+        <h1 style="font-weight:bold;font-size:30px;" class="welcome-text text-center">Welcome to Home Page</h1>
+    </div>
+    <div class="right-menu">
+        <div th:unless="${#authorization.expression('isAuthenticated()')}">
+            <a th:href="@{/users/LoginPage}" class="btn btn-primary btn-custom">Login</a>
+            <!--                <a th:href="@{/users/showFormForAdd}" class="btn btn-success btn-custom">Register</a>-->
+        </div>
+        <div th:if="${#authorization.expression('isAuthenticated()') }">
+            <h5 th:if="${user!=null}" style="margin-left:75px;" th:text="${user.username}"></h5>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="background-color:#333;border:0;color:red;" class="btn btn-danger btn-custom">Logout</button>
+            </form>
+            <a th:href="@{/survey/home}" class="btn-link">Home</a>
+            <a th:href="@{/survey/userdetails}" class="btn-link" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Users</a>
+            <a th:href="@{/survey/branches}" class="btn-link" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Branches</a>
+            <div  class="dropdown-container" id="adminActions">
+                <button style="color:white;margin-left:100%;text-decoration:none;border:0;" class="dropdown-button">Surveys</button>
+                <ul style="background-color:#333;border:0;" class="dropdown-content">
+                    <li style="color:white;margin-left:60%;text-decoration:none" class="btn-link" data-value="/survey/surveys">Surveys</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            <h2 th:if="${!#authorization.expression('hasRole(''ADMIN'')') and #authorization.expression('isAuthenticated()') }" >Available Surveys</h2>
+        </div>
+        <div class="col-md-6" th:each="survey : ${surveys}"
+             th:if="${survey!=null and #authorization.expression('isAuthenticated()') and !#authorization.expression('hasRole(''ADMIN'')') and survey.isSurveyEnable and user != null}">
+            <th:block th:each="branch : ${survey.branches}">
+                <th:block th:if="${branch.id == user.branch.id}">
+                    <div class="card survey-card">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${survey.title}">Survey Title</h5>
+                            (<span class="submission-time" th:text="${survey.formattedTime}" th:attr="data-timestamp=${survey.formattedTime}"></span>)
+                            <p class="card-text">Description or other details about the survey can go here.</p>
+                            <form th:action="@{/survey/questionPage}" method="get">
+                                <input type="hidden" name="surveyId" th:value="${survey.id}">
+                                <button type="submit" class="btn btn-primary">Open Survey</button>
+                            </form>
+                        </div>
+                    </div>
+                </th:block>
+            </th:block>
+        </div>
+    </div>
+    <div class="row" th:if="${#authorization.expression('hasRole(''ADMIN'')') and #authorization.expression('isAuthenticated()') }">
+        <div class="col-md-6">
+            <div class="blog-card">
+                <h3>Number of Employees</h3>
+                <p class="blog-number" th:text="${totalUsers}"></p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="blog-card">
+                <h3>Number of Surveys</h3>
+                <p class="blog-number" th:text="${totalSurveys}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const adminActions = document.getElementById("adminActions");
+        const dropdownButton = adminActions.querySelector(".dropdown-button");
+        const dropdownOptions = adminActions.querySelector(".dropdown-content");
+
+        dropdownButton.addEventListener("click", function () {
+            dropdownOptions.style.display = dropdownOptions.style.display === "block" ? "none" : "block";
+        });
+        const dropdownItems = dropdownOptions.querySelectorAll("li.btn-link");
+        dropdownItems.forEach(function (item) {
+            item.addEventListener("click", function () {
+                const selectedValue = item.getAttribute("data-value");
+                if (selectedValue) {
+                    window.location.href = selectedValue;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

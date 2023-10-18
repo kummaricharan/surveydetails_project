@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script th:src="@{/css/timeUpdater.js}" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .logo {
+            max-height: 100px;
+        }
+        .welcome-text {
+            font-size: 36px;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+        }
+        .btn-custom {
+            margin-top: 20px;
+        }
+        .right-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            width: 300px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+        .right-menu a {
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+        .right-menu a:hover {
+            background-color: #555;
+        }
+        .survey-card {
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fff;
+        }
+        .survey-card h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .survey-card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .survey-card th, .survey-card td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        .survey-card th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .survey-card label {
+            margin-left: 5px;
+        }
+        .submit-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png" alt="Logo" class="logo">
+        <h1 class="welcome-text">Welcome to the Employee Portal</h1>
+    </div>
+    <div class="right-corner">
+        <div class="right-menu">
+            <div th:if="${#authorization.expression('isAuthenticated()') }">
+                <h5 th:if="${user!=null}" th:text="${user.username}"></h5>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-danger btn-custom">Logout</button>
+                </form></br>
+            </div>
+            <a th:href="@{/survey/home}" class="btn btn-primary btn-custom">Home</a>
+            <div th:unless="${#authorization.expression('isAuthenticated()')}">
+                <a th:href="@{/users/LoginPage}" class="btn btn-primary btn-custom">Login</a>
+                <a th:href="@{/users/showFormForAdd}" class="btn btn-success btn-custom">Register</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="survey-card">
+        <h2>Survey Details</h2>
+        <form th:action="@{/survey/submitSurvey}" method="post">
+            <input type="hidden" th:name="surveyId" th:value="${survey.id}">
+            <table>
+                <tbody>
+<!--                <tr th:each="question : ${survey.questions}" th:if="${!question.options.isEmpty()}">-->
+<!--                    <td  th:text="${question.question}"></td>-->
+<!--                    <td>-->
+<!--                        <div th:each="option : ${question.options}">-->
+<!--                            <input type="radio" th:id="'option_' + ${question.id}" th:name="'selectedOption_' + ${question.id}" th:value="${option.option}">-->
+<!--                            <label th:for="'option_' + ${question.id}" th:text="${option.option}"></label>-->
+<!--                        </div>-->
+<!--                    </td>-->
+<!--                </tr>-->
+                    <tr th:each="question : ${survey.questions}" th:if="${!question.options.isEmpty()}">
+                        <td th:text="${question.question}"></td>
+                        <td>
+                            <div th:each="option : ${question.options}">
+                                <input type="radio" th:id="'option_' + ${question.id}" th:name="'selectedOption_' + ${question.id}"
+                                       th:value="${option.id}" th:attr="data-questionId=${question.id}">
+                                <label th:for="'option_' + ${question.id}" th:text="${option.option}"></label>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="submit-button">
+                <input type="submit" class="btn btn-primary" value="Submit Survey">
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

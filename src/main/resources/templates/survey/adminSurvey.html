@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 50px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .logo {
+            max-height: 100px;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .survey-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .survey-list-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .survey-title {
+            font-weight: bold;
+        }
+
+        .create-survey-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png" alt="Logo" class="logo">
+        <h1 class="welcome-text text-center">Survey Page</h1>
+    </div>
+    <hr>
+    <ul class="survey-list">
+        <li th:each="survey : ${surveys}" class="survey-list-item">
+            <form th:if="${survey != null}" th:action="@{/survey/goToQuestionCreatingPage}" method="get">
+                <input type="hidden" name="surveyId" th:value="${survey.id}">
+                <button type="submit" class="btn btn-link">
+                    <span class="survey-title" th:text="${survey.title}"></span>
+                </button>
+            </form>
+        </li>
+    </ul>
+    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/survey/createSurvey}" class="btn btn-primary btn-custom">Create Survey</a><br>
+    <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/survey/home}" class="btn btn-primary admin-link">Go to Home Page</a>
+</div>
+</body>
+</html>

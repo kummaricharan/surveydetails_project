@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script th:src="@{/css/timeUpdater.js}" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .logo {
+            max-height: 100px;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+        }
+
+        .btn-custom {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+        }
+
+        .survey-card {
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .right-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            width: 300px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .right-menu a {
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+            text-align: center;
+        }
+
+        .blog-card {
+            margin-top: 20px;
+            border: 2px solid black;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .blog-number {
+            font-size: 50px;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        .admin-actions-label {
+            margin-bottom: 0px;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+        }
+
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-button {
+            text-decoration: underline;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0);
+            z-index: 1;
+        }
+
+        .dropdown-content li {
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+        .success{
+            color:#1ca350;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png"
+             alt="Logo" class="logo">
+        <h1 class="welcome-text text-center success" th:text="${success}"></h1>
+        <h1 style="font-weight:bold;font-size:30px;" class="welcome-text text-center">Welcome to the Branches</h1>
+    </div>
+    <div class="right-menu">
+        <div th:if="${#authorization.expression('isAuthenticated()') }">
+            <h5 th:if="${user!=null}" th:text="${user.username}"></h5>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="background-color:#333;border:0;color:red;"
+                        class="btn btn-danger btn-custom">Logout
+                </button>
+            </form>
+            <a th:href="@{/survey/home}" class="btn-link">Home</a>
+            <a th:href="@{/survey/userdetails}" class="btn-link"
+               th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Users
+            </a>
+            <a th:href="@{/survey/branches}" class="btn-link"
+               th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Branches
+            </a>
+            <div class="dropdown-container" id="adminActions">
+                <button style="color:white;margin-left:100%;text-decoration:none;border:0;"
+                        class="dropdown-button">Surveys
+                </button>
+                <ul style="background-color:#333;border:0;" class="dropdown-content">
+                    <li style="color:white;margin-left:60%;text-decoration:none" class="btn-link"
+                        data-value="/survey/surveys">Surveys
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row"
+         th:if="${#authorization.expression('hasRole(''ADMIN'')') and #authorization.expression('isAuthenticated()')}">
+        <h1 style="font-weight:bold;font-size:30px;">Branch Details</h1>
+        <a style="margin-left:69%;" id="createSurveyButton" class="btn btn-primary btn-custom">Add branch</a>
+        <a style="margin-left:69%;" id="createSurveyButton1" class="btn btn-primary btn-custom">Delete Branch</a>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Branch</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="branch : ${branches}">
+                <td th:text="${branch.id}">-</td>
+                <td th:text="${branch.branch}">-</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal" id="createSurveyModal" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="text-left">
+                    <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png"
+                         alt="Logo" class="logo">
+                    <h1 class="welcome-text">Add Branch</h1>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/survey/saveBranch}" th:object="${branch}" method="post">
+                    <div class="form-group">
+                        <label for="branch">Branch:</label>
+                        <input type="text" id="branch" name="branch" th:field="*{branch}" required/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Branch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="createSurveyModalForDeleteBranch" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="text-left">
+                    <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png"
+                         alt="Logo" class="logo">
+                    <h1 class="welcome-text">Delete Branch</h1>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/survey/deleteBranch}" method="post">
+                    <div class="form-group">
+                        <label for="deleteBranch">Select Branch</label>
+                        <select name="branch" id="deleteBranch">
+                            <option th:each="branch : ${branches}" th:value="${branch.branch}"
+                                    th:text="${branch.branch}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete?');">Delete Branch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const createSurveyButton = document.getElementById("createSurveyButton");
+    const createSurveyModal = new bootstrap.Modal(document.getElementById("createSurveyModal"));
+
+    createSurveyButton.addEventListener("click", function () {
+        createSurveyModal.show();
+    });
+
+    const createSurveyButtonDelete = document.getElementById("createSurveyButton1");
+    const createSurveyModalDelete = new bootstrap.Modal(document.getElementById("createSurveyModalForDeleteBranch"));
+
+    createSurveyButtonDelete.addEventListener("click", function () {
+        createSurveyModalDelete.show();
+    });
+
+    const adminActions = document.getElementById("adminActions");
+    const dropdownButton = adminActions.querySelector(".dropdown-button");
+    const dropdownOptions = adminActions.querySelector(".dropdown-content");
+
+    dropdownOptions.addEventListener("click", (event) => {
+        if (event.target.classList.contains("btn-link")) {
+            const selectedValue = event.target.getAttribute("data-value");
+            if (selectedValue) {
+                window.location.href = selectedValue;
+            }
+        }
+    });
+</script>
+</body>
+</html>

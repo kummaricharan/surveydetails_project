@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script th:src="@{/css/timeUpdater.js}" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .logo {
+            max-height: 100px;
+        }
+        .welcome-text {
+            font-size: 24px;
+        }
+        .btn-custom {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+        }
+        .survey-card {
+            position: absolute;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .right-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            width: 300px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+        .right-menu a {
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+            text-align: center;
+        }
+        .blog-card {
+            margin-top: 20px;
+            border: 2px solid black;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        .blog-number {
+            font-size: 50px;
+            color: #007bff;// Toggle the visibility of the dropdown options
+            margin-top: 10px;
+        }
+        .admin-actions-label {
+            margin-bottom: 0px;
+        }
+        .login-container {
+            text-align: center;
+            margin: 30px auto;
+            max-width: 400px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-container label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .login-container button {
+            background: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background: #0056b3;
+        }
+        .error-message {
+            color: #ff0000;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png" alt="Logo" class="logo">
+        <h1 class="welcome-text text-center">Welcome to the User Update Page</h1>
+    </div>
+    <div class="right-corner">
+        <div class="right-menu">
+            <div th:if="${#authorization.expression('isAuthenticated()')}">
+                <h5 th:if="${user!=null}" th:text="${user.username}"></h5>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-danger btn-custom">Logout</button>
+                </form><br>
+                <a th:href="@{/survey/home}" class="btn btn-primary btn-custom">Home</a>
+                <a th:href="@{/survey/userdetails}" class="btn btn-primary btn-custom" th:if="${#authorization.expression('hasRole(''ADMIN'')}">Users</a>
+                <a th:href="@{/survey/branches}" class="btn btn-primary btn-custom" th:if="${#authorization.expression('hasRole(''ADMIN'')}">Branches</a>
+                <select th:if="${#authorization.expression('hasRole(''ADMIN'')}}" id="adminActions" class="btn btn-primary btn-custom">
+                    <option value="#" disabled selected>Surveys</option>
+                    <option value="/survey/surveys" th:if="${#authorization.expression('hasRole(''ADMIN'')}">Survey Page</option>
+                </select>
+                <script>
+                    document.getElementById("adminActions").addEventListener("change", function () {
+                        var selectedOption = this.value;
+                        if (selectedOption !== "#") {
+                            window.location.href = selectedOption;
+                        }
+                    });
+                </script>
+            </div>
+            <div th:unless="${#authorization.expression('isAuthenticated()')}">
+                <a th:href="@{/users/LoginPage}" class="btn btn-primary btn-custom">Login</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="login-container">
+        <form action="#" th:action="@{/users/updatePassword}" method="post">
+            <span class="error-message" th:text="${error}"></span>
+            <label for="email">Enter Mail:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <!--    <p>If you don't have an account, <a th:href="@{/users/showFormForAdd}">click here to register</a>.</p>-->
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home page</title>
+</head>
+<body>
+<form th:if="${survey != null} and ${survey.isSurveyEnable==false}" th:action="@{/survey/addQuestion}" method="post">
+    <input type="hidden" name="surveyId" th:value="${survey.id}">
+    <button type="submit">
+        add question
+    </button>
+</form>
+<form th:if="${survey != null} and ${survey.isSurveyEnable==false}" th:action="@{/survey/publishSurvey}" method="post">
+    <input type="hidden" name="surveyId" th:value="${survey.id}">
+    <button type="submit">
+        publish survey
+    </button>
+</form>
+<form th:if="${survey != null} and ${survey.isSurveyEnable==true}" th:action="@{/survey/unpublishSurvey}" method="post">
+    <input type="hidden" name="surveyId" th:value="${survey.id}">
+    <button type="submit">
+        stop publishing survey
+    </button>
+</form>
+<form th:if="${survey != null} and ${survey.isSurveyEnable==true}" th:action="@{/survey/report}" method="post">
+    <input type="hidden" name="surveyId" th:value="${survey.id}">
+    <button type="submit">
+        see report of survey
+    </button>
+</form>
+<a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/survey/home}" class="btn btn-primary mb-3">go to home page</a><br>
+</body>
+</html>

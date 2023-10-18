@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script th:src="@{/css/timeUpdater.js}" type="text/javascript"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .logo {
+            max-height: 100px;
+        }
+        .welcome-text {
+            font-size: 24px;
+        }
+        .btn-custom {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 250px;
+            height: 55px;
+            color: #fff;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        .right-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: #333;
+            width: 300px;
+            height: 100%;
+            padding: 20px;
+            color: #fff;
+        }
+        .right-menu a {
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal-content {
+            background-color: #fff;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .btn-link {
+            text-decoration: none;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+        }
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-button {
+            text-decoration: underline;
+            background: none;
+            border: 0;
+            color: #007bff;
+            padding: 0;
+            cursor: pointer;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0);
+            z-index: 1;
+        }
+        .dropdown-content li {
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="text-left">
+        <img src="https://varthana.com/school/wp-content/uploads/2021/02/cropped-Varthana-Logo.png" alt="Logo" class="logo">
+        <h1 class="welcome-text text-center" style="font-weight:bold;font-size:30px;">Welcome to the User Page</h1>
+    </div>
+    <div class="right-menu">
+        <div th:if="${#authorization.expression('isAuthenticated()') }">
+            <h5 th:if="${user!=null}" th:text="${user.username}"></h5>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="background-color:#333;border:0;color:red;" class="btn btn-danger btn-custom">Logout</button>
+            </form>
+            <a th:href="@{/survey/home}" class="btn-link">Home</a>
+            <a th:href="@{/survey/userdetails}" class="btn-link" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Users</a>
+            <a th:href="@{/survey/branches}" class="btn-link" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Branches</a>
+            <div  class="dropdown-container" id="adminActions">
+                <button style="color:white;margin-left:100%;text-decoration:none;border:0;" class="dropdown-button">Surveys</button>
+                <ul style="background-color:#333;border:0;" class="dropdown-content">
+                    <li style="color:white;margin-left:60%;text-decoration:none;"class="btn-link" data-value="/survey/surveys">Surveys</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row" th:if="${#authorization.expression('hasRole(''ADMIN'')') and #authorization.expression('isAuthenticated()')}">
+        <h1 style="font-weight:bold;font-size:30px;">User Details</h1>
+        <a style="margin-left:69%;" th:href="@{/users/showFormForAdd}" class="btn btn-primary btn-custom" >Add User</a>
+        <div style="margin-top: 10px;"></div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Branch</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">-</td>
+                <td th:text="${user.username}">-</td>
+                <td th:text="${user.gender}">-</td>
+                <td th:text="${user.email}">-</td>
+                <td th:text="${user.role}">-</td>
+                <td th:text="${user.branch.branch}">-</td>
+                <td><a th:href="@{/users/editUser(userId=${user.id})}" class="btn btn-info btn-sm">Edit</a></td>
+                <td><form th:action="@{/users/deleteUser}" method="post">
+                    <input type="hidden" name="userId" th:value="${user.id}">
+                    <input type="submit" value="Delete" class="btn btn-info btn-sm" onclick="return confirm('Are you sure you want to delete?');">
+                </form></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const adminActions = document.getElementById("adminActions");
+        const dropdownButton = adminActions.querySelector(".dropdown-button");
+        const dropdownOptions = adminActions.querySelector(".dropdown-content");
+
+        dropdownButton.addEventListener("click", function () {
+            dropdownOptions.style.display = dropdownOptions.style.display === "block" ? "none" : "block";
+        });
+        const dropdownItems = dropdownOptions.querySelectorAll("li.btn-link");
+        dropdownItems.forEach(function (item) {
+            item.addEventListener("click", function () {
+                const selectedValue = item.getAttribute("data-value");
+                if (selectedValue) {
+                    window.location.href = selectedValue;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
